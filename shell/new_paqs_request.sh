@@ -27,11 +27,11 @@ fi
 cd "$src/.."
 # Copy files to new request directory 
 cp -r config_template shell Dockerfile requirements.txt request_info.qmd pcornet-style-sheet.css "$target_path"
-cp -r code specs "$target_path"/"$target_path"
+cp -r code specs "$target_path"/"$target"
 
 vers=$(git log -1 --date=short --format='%h %ad')
 
-cd "$target_path"/"$target_path"
+cd "$target_path"/"$target"
 mkdir results
 echo "\!.placeholder" >> results/.gitignore
 
