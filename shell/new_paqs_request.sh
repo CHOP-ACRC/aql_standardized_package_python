@@ -5,14 +5,14 @@
 
 
 ## Check if the target directory has content
-target=${1:-new_paqs_request}
+target=${1:-new-paqs-request}
 if [[ ! -z $(ls -d "$target"/* 2>/dev/null)  || \
       ! -z $(ls -d "$target"/.[a-zA-Z0-9]* 2>/dev/null | grep -v /.git\$ ) ]]
 then
     echo >&2 "Target directory $target already has content."
     exit 1
 fi
-if [[ ! -d "$target" ]]; then mkdir -p "$target"; fi
+if [[ ! -d "$target" ]]; then mkdir -p "$target"/"$target"; fi
 target_path=$(cd "$target"; pwd)
 
 src=$(dirname $0)

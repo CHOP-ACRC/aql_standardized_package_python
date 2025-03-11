@@ -273,7 +273,18 @@ def main():
         results = {}
         results["Query Start Time"] = datetime.datetime.now()
 
+        logging.info("PCORnet Advanced Querying System (PAQS)")
+        logging.info("PAQS Version: 1.0")
         logging.info("Query Title - to be printed at top of log ")
+        
+        logging.info("Execution Details:")
+        logging.info("\tRun Date: %s", datetime.datetime.today().date())
+        logging.info("\tConfig Info:")
+        logging.info("\t\tSite: %s", config["src_site"]["SiteName"])
+        logging.info("\t\tsrc_name: %s", config["src_name"])
+
+        if config["src_name"] == "odbc":
+            logging.info("\t\tDriver: %s", config["src_args"]["Driver"])
         
         # Define query-specific variables, for example:
         min_date_cutoff = ""

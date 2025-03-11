@@ -25,8 +25,8 @@ fi
 
 # Create a directory for query package
 mkdir -p qf-query-package
-cp shell/execute-query.sh qf-query-package 
-cp shell/parse_log.sh qf-query-package 
+#cp shell/execute-query.sh qf-query-package 
+#cp shell/parse_log.sh qf-query-package 
 # Move into the query folder
 cd "$query_name" || exit 1
 
@@ -59,10 +59,12 @@ done
 cd ..
 
 mkdir temp_dir_docker
-cp -r  Dockerfile config_template qf-query-package results temp_dir_docker #"Docker desktop for windows or mac.docx"
+cp -r Dockerfile config_template qf-query-package results temp_dir_docker #"Docker desktop for windows or mac.docx"
 
 mkdir temp_dir_native_python
-cp -r  requirements.txt config_template qf-query-package results temp_dir_native_python #"Docker desktop for windows or mac.docx"
+cp -r requirements.txt config_template qf-query-package results temp_dir_native_python
+mkdir -p temp_dir_native_python/shell
+cp -r shell/setup_venv* temp_dir_native_python/shell/
 
 # Render request_info.qmd to HTML
 quarto render request_info.qmd --to html
@@ -75,13 +77,13 @@ mv request_info.html "workplan/${req_name}-workplan.html"
 
 cd temp_dir_docker
 # Create zip file with necessary contents
-zip -r9X "${req_name}_docker.zip" *
+zip -r9X "${req_name}-docker.zip" *
+mv "${req_name}"-docker.zip ..
 
-cd temp_dir_native_python
+cd ../temp_dir_native_python
 # Create zip file with necessary contents
-zip -r9X "${req_name}_native_python.zip" *
-
-mv "${req_name}".zip ..
+zip -r9X "${req_name}-native-python.zip" *
+mv "${req_name}"-native-python.zip ..
 
 cd ..
 # Remove qf-query-package directory
