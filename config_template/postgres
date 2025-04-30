@@ -5,16 +5,17 @@
          "port"     : 5432,
          "dbname"   : "my_database",
          "user"     : "my_username",
-         "password" : "DO_NOT_EDIT_IF_YOU_WISH_TO_ENTER_IT_ON_DOCKER_RUN",
          "sslmode"  : "require",
          "options"  : "-c search_path=",
          "bigint": "numeric"
     },
     "post_connect_sql": [
-        
+
     ],
     "src_site": {
         "SiteName" : "DataMart ID",
-        "db_schema" : "Schema for PCORnet CDM on the Database"
+        "db_schema" : "Schema for PCORnet CDM on the Database",
+        "cdm_case" : "Enter your CDM's case | choices : lower,upper",
+        "can_index" : "If your database can create indexes | choices : true/false"
      }
 }

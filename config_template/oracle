@@ -1,0 +1,14 @@
+{
+    "src_name" : "odbc",
+    "src_args" : {
+          "Driver": "Oracle 23 ODBC driver",
+          "DBQ" : "HOST:PORT/SERVICE_NAME",
+          "UID" : "my_username"
+     },
+     "src_site": {
+        "SiteName" : "DataMart ID",
+        "db_schema" : "Schema for PCORnet CDM on the Database",
+        "cdm_case" : "Enter your CDM's case | choices : lower,upper",
+        "can_index" : "If your database can create indexes | choices : true/false"
+     }
+}

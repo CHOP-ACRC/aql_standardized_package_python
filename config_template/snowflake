@@ -6,12 +6,13 @@
           "SCHEMA": "my_schema",
           "Database": "my_database",
           "UID": "my_username",
-          "PWD": "DO_NOT_EDIT_IF_YOU_WISH_TO_ENTER_IT_ON_DOCKER_RUN",
           "Role":"my_role",
           "WAREHOUSE":"my_warehouse"
      },
      "src_site": {
         "SiteName" : "DataMart ID",
-        "temp_schema": ""
+        "cdm_case" : "Enter your CDM's case | choices : lower,upper",
+        "temp_schema": "",
+        "can_index" : false
      }
  }

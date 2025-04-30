@@ -1,0 +1,14 @@
+{
+    "src_name" : "src_bigquery",
+    "src_args" : {
+        "project": "myProject",
+        "dataset": "myDataset"
+     },
+     "src_site": {
+        "SiteName" : "DataMart ID",
+        "codeset_dataset" : "myCodesetDataset",
+        "path_to_service_token" : "/root/bq_token",
+        "cdm_case" : "Enter your CDM's case | choices : lower,upper",
+        "can_index" : false
+     }
+ }

@@ -1,10 +1,10 @@
 '''
-Query-specific code for the request
+Query-specific code for the request (native Python execution)
 
 Here are some suggestions on getting started writing a query in Python using a Docker container
 
 NOTES:
-    - Calls get_db_url from db_connection.py to establish database connection using AQLAlchemy
+    - Calls get_db_url from db_connection.py to establish database connection using SQLAlchemy
     - Executes SQLAlchemy command against the database provided.
 ''' 
 import sqlalchemy as sqlalc
@@ -18,16 +18,45 @@ import argparse
 import os
 # Additional packages may be needed for your query and may need to be added to the requirements.txt file to be installed within the container.
 
+# Set up argument parser
+parser = argparse.ArgumentParser(description="dbconfig file path")
+parser.add_argument("dbconfig_path", type=str, help="Path to dbconfig file")
+args = parser.parse_args()
+
+
 #silence SQLAlchemy warning message & disable printing sql commands for snowflake
 sqlalc.util.deprecations.SILENCE_UBER_WARNING = True
 snowflake_logger = logging.getLogger('snowflake.connector')
 snowflake_logger.setLevel(logging.WARNING)
 
-config_file_path = "/app/config_file"
+
+# get dbconfig file path
+def dbconfig_path(path):
+    if os.path.isdir(path): # If it's a folder, append 'dbconfig' to the path
+        dbconfig_path = os.path.join(path, 'dbconfig')
+        dbconfig_json_path = os.path.join(path, 'dbconfig.json')
+        if os.path.isfile(dbconfig_json_path):
+            dbconfig_path = dbconfig_json_path
+    elif os.path.isfile(path): # If it's a file, use the provided path
+        dbconfig_path = path
+    else:
+        print(f"Error: The path '{path}' is neither a valid directory nor a file.")
+        return
+    
+    #Check if the dbconfig file exists
+    if not os.path.isfile(dbconfig_path):
+        print(f"Error: No file named 'dbconfig' found at '{dbconfig_path}'.")
+        return
+
+    # Get the absolute path of the dbconfig file
+    dbconfig_full_path = os.path.abspath(dbconfig_path)
+    return dbconfig_full_path 
+
+config_file_path = dbconfig_path(args.dbconfig_path)
 config, db_url = get_db_url(config_file_path) #get config and db_url from get_db_url
 
 # create log file
-logging.basicConfig(filename = f'/results/{config["src_site"]["SiteName"]}.log', level=logging.INFO, format='%(message)s', datefmt='%Y-%m-%d %H:%M:%S', filemode='w')
+logging.basicConfig(filename = f'results/{config["src_site"]["SiteName"]}.log', level=logging.INFO, format='%(message)s', datefmt='%Y-%m-%d %H:%M:%S', filemode='w')
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
 logging.getLogger().addHandler(console)
@@ -37,7 +66,7 @@ def load_codeset(conn, rdbms, current_temp_tables, name, tbl_name=None, col_type
     '''
         Create a temporary db table with a codeset as per the query
             - Reads the named codeset from a CSV file, and creates a like-named temporary table in the database with the contents.
-            - Expects the csv file to be in the specs directory, to have a header, and to contain four columns:
+            - Expects the csv file to be in the code_sets directory, to have a header, and to contain four columns:
             * concept_id - integer
             * concept_name - string
             * concept_code - string
@@ -47,7 +76,7 @@ def load_codeset(conn, rdbms, current_temp_tables, name, tbl_name=None, col_type
             conn: a connection to the database into which to load the codeset
             rdbms: relational database management system software associated with the current connection
             current_temp_tables: a list of temporary tables associated with the current connection
-            name: the name of the codeset. Typically just the file name without `.csv` suffix, but if for some reason you've expanded the  directory tree under `specs`, you may prefix it with subdirectories
+            name: the name of the codeset. Typically just the file name without `.csv` suffix, but if for some reason you've expanded the  directory tree under `code_sets`, you may prefix it with subdirectories
             tbl_name: an optional name for the table, if you want it to differ from `name`
             col_types: an optional string of i's & c's representing column types for a codeset, defaults to 'iccc' where i corresponds to INTEGER and c corresponds to VARCHAR(256)
             overwrite: whether to overwrite an existing table of the same name. Temporary tables will only overwrite when the tbl_name is present in the current_temp_tables attribute. Defaults to False. 
@@ -66,14 +95,14 @@ def load_codeset(conn, rdbms, current_temp_tables, name, tbl_name=None, col_type
     db_col_type_list = [type_mapping[letter][0] for letter in col_types]
     df_col_type_list = [type_mapping[letter][1] for letter in col_types]
 
-    with open(f'specs/{name}.csv', mode='r', newline='') as file:
+    with open(f'code_sets/{name}.csv', mode='r', newline='') as file:
         reader = csv.reader(file)
         df_column_names = next(reader)
 
     df_col_dict = dict(zip(df_column_names, df_col_type_list))     
 
     # Read csv file 
-    df = pd.read_csv(f'specs/{name}.csv', dtype=df_col_dict)
+    df = pd.read_csv(f'code_sets/{name}.csv', dtype=df_col_dict)
     df.columns = df.columns.str.lower() # convert all column names to lowercase for consistency 
     col_name_list = [column_name for column_name in df.columns] #extract column names from df 
 
@@ -193,7 +222,7 @@ def get_table_one(cohort, cohort_name, cat_vars, cont_vars):
         cont_vars: list of continuous variables
 
     Returns:
-        aql_query2_{cohort_name}_table1.csv
+        sample_query_{cohort_name}_table1.csv
     '''
     column_mapping = {col: col.lower() for col in cohort.columns if 'age_at_HEI' not in col} # do not change case of columns like 'age_at_HEI...'
     cohort.rename(columns=column_mapping, inplace=True)
@@ -247,7 +276,7 @@ def get_table_one(cohort, cohort_name, cat_vars, cont_vars):
 
     # Generate the resulting dataframe and save to csv file
     tbl_1_results_df = pd.DataFrame(tbl_1_results)
-    tbl_1_results_df.to_csv(f"/results/aql_query2_{cohort_name}_table1.csv", index=False)
+    tbl_1_results_df.to_csv(f"results/sample_query_{cohort_name}_table1.csv", index=False)
 
 
 # Add query-specific functions
@@ -273,7 +302,7 @@ def main():
         results = {}
         results["Query Start Time"] = datetime.datetime.now()
 
-        logging.info("PCORnet Advanced Querying System (PAQS)")
+        logging.info("PCORnet® Advanced Querying System (PAQS)")
         logging.info("PAQS Version: 1.0")
         logging.info("Query Title - to be printed at top of log ")
         
@@ -360,7 +389,7 @@ def main():
             logging.info("Saving attrition...")
             attr_results = [{"cohort": attr[0], "group": attr[1], "persons": attr[2], "qry_site": attr[3],"stamp": attr[4],"used": attr[5]} for attr in attr_list]
             headers = ["cohort","group","persons","qry_site","stamp","used"]
-            with open("/results/attrition.csv", mode="w", newline="") as file:
+            with open("results/attrition.csv", mode="w", newline="") as file:
                 writer = csv.DictWriter(file, fieldnames=headers)
                 writer.writeheader()
                 for row in attr_results:
@@ -378,7 +407,7 @@ def main():
             logging.info("Generating signature file")
             signature_results = [{"Query Start Time": results["Query Start Time"], "Query End Time": results["Query End Time"], "Total Run Time": results["Total Run time"]}]
             headers = ["Query Start Time", "Query End Time", "Total Run Time"]
-            with open("/results/your_query_signature.csv", mode="w", newline="") as file:
+            with open("results/your_query_signature.csv", mode="w", newline="") as file:
                 writer = csv.DictWriter(file, fieldnames=headers)
                 writer.writeheader()
                 for row in signature_results:

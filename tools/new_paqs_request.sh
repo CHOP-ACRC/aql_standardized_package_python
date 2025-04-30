@@ -12,8 +12,8 @@ then
     echo >&2 "Target directory $target already has content."
     exit 1
 fi
-if [[ ! -d "$target" ]]; then mkdir -p "$target"/"$target"; fi
-target_path=$(cd "$target"; pwd)
+# if [[ ! -d "$target" ]]; then mkdir -p "$target"/"$target"; fi
+# target_path=$(cd "$target"; pwd)
 
 src=$(dirname $0)
 src=${src:-$PWD}
@@ -26,8 +26,7 @@ fi
 
 cd "$src/.."
 # Copy files to new request directory 
-cp -r config_template shell Dockerfile requirements.txt request_info.qmd pcornet-style-sheet.css "$target_path"
-cp -r code specs "$target_path"/"$target"
+cp -r config_template package query tools Dockerfile requirements.txt workplan.qmd "$target_path"
 
 vers=$(git log -1 --date=short --format='%h %ad')
 

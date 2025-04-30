@@ -1,0 +1,13 @@
+*~
+~$*
+.DS_Store
+.DS_STore?  
+**/results/**/*.csv
+**/results/**/*.log
+**/local/**
+*.nb.html
+*.pdf
+*.html
+*.gpg
+.#*
+config

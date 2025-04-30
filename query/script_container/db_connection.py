@@ -30,7 +30,7 @@ def get_db_url(config_file_path):
       if "DO_NOT_EDIT_IF_YOU_WISH_TO_ENTER_IT_ON_DOCKER_RUN" in config["src_args"].values():
         config["src_args"]["password"] = getpass.getpass(f"Enter Password for {config['src_args']['user']}: ")
       password = config["src_args"]["password"].replace("@", "%40").replace("/", "%2F")
-      db_url = f'postgresql+psycopg2://{config["src_args"]["user"]}:{password}@{config["src_args"]["host"]}/{config["src_args"]["dbname"]}'#?options={config["src_args"]["options"]}'
+      db_url = f'postgresql+psycopg2://{config["src_args"]["user"]}:{password}@{config["src_args"]["host"]}/{config["src_args"]["dbname"]}?options={config["src_args"]["options"]}'
 
   elif config["src_name"].lower() == "odbc":
     #connection URL for Snowflake
